@@ -2,7 +2,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update \
     && mkdir -p /usr/share/man/man1 \
-    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev \
+    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev libntirpc-dev \
     && adduser --uid 1000 --home /home/mpiuser --shell /bin/bash \
        --disabled-password --gecos '' mpiuser \
     && passwd -d mpiuser \
@@ -178,6 +178,16 @@ RUN set -x \
     && chown slurm:slurm /etc/slurm/slurmdbd.conf \
     && chmod 600 /etc/slurm/slurmdbd.conf
 
+ARG BRIDGE_TAG=v1.5.9
+
+RUN set -x \
+    && git clone -b ${BRIDGE_TAG} --single-branch --depth=1 https://github.com/cea-hpc/bridge.git \
+    && cd bridge \
+	&& export CFLAGS=-I/usr/include/tirpc \
+	&& export LDFLAGS=-ltirpc \
+    && ./configure  --enable-dependency-tracking --enable-debug --prefix=/usr/bin --program-prefix=ccc_ --with-slurm --libdir=/usr/lib64 \
+	&& make \
+    && make install
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

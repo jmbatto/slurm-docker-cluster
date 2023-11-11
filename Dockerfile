@@ -171,6 +171,12 @@ RUN set -x \
 	
 # RUN /usr/sbin/create-munge-key
 RUN dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key
+RUN chown munge: /etc/munge/munge.key
+RUN chmod 400 /etc/munge/munge.key
+RUN mkdir -p /var/run/munge
+RUN chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/
+RUN chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
+RUN chmod 755 /run/munge
 
 COPY slurm.conf /etc/slurm/slurm.conf
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf

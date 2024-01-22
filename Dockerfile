@@ -2,7 +2,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update \
     && mkdir -p /usr/share/man/man1 \
-    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev libntirpc-dev \
+    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev libntirpc-dev libpmix-dev libpmix2 libpmi2-0-dev \
     && adduser --uid 1000 --home /home/mpiuser --shell /bin/bash \
        --disabled-password --gecos '' mpiuser \
     && passwd -d mpiuser \
@@ -23,6 +23,14 @@ ENV PREFIX=/usr/local \
 	OPENMPI_VERSION=4.1.6 \
     LD_LIBRARY_PATH=/usr/local/lib \
     DEBCONF_NOWARNINGS=yes
+	ENV USE_SLURMDBD=true \
+	CLUSTER_NAME=linux \
+	CONTROL_MACHINE=slurmctld \
+	SLURMCTLD_PORT=6817 \
+	SLURMD_PORT=6818 \
+	ACCOUNTING_STORAGE_HOST=slurmdbd \
+	ACCOUNTING_STORAGE_PORT=6819 \
+	PARTITION_NAME=docker
 
 # ------------------------------------------------------------
 # Install OpenMPI 4.1
@@ -36,7 +44,7 @@ RUN repo="https://download.open-mpi.org/release/open-mpi/v4.1" \
     && tar xzf openmpi.tar.gz -C /tmp/ \
     && cd /tmp/openmpi-${OPENMPI_VERSION} \
 	&& env CFLAGS="-O2 -std=gnu99 -fopenmp" \
-    && ./configure --enable-mpi-threads --enable-ft-thread --prefix=${PREFIX} \
+    && ./configure --enable-mpi-threads --enable-ft-thread --prefix=${PREFIX} --with-pmix --with-slurm --with-pmi \
     && make \
     && make install \
     && ldconfig \
@@ -103,7 +111,7 @@ RUN touch /home/mpiuser/.ssh-source/id_rsa
 
 
 # ------------------------------------------------------------
-# Do SSHd parameter to enable mpiuser to run it
+# Do SSHd parameter to enable slurm to run it
 # ------------------------------------------------------------
 RUN sed -i s/#UsePrivilegeSeparation.*/UsePrivilegeSeparation\ no/ /etc/ssh/sshd_config
 RUN mkdir -p /home/mpiuser/ssh
@@ -178,11 +186,6 @@ RUN chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/
 RUN chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/
 RUN chmod 755 /run/munge
 
-COPY slurm.conf /etc/slurm/slurm.conf
-COPY slurmdbd.conf /etc/slurm/slurmdbd.conf
-RUN set -x \
-    && chown slurm:slurm /etc/slurm/slurmdbd.conf \
-    && chmod 600 /etc/slurm/slurmdbd.conf
 
 ARG BRIDGE_TAG=v1.5.9
 
@@ -195,7 +198,12 @@ RUN set -x \
 	&& make \
     && make install
 
+COPY slurm.conf /etc/slurm/slurm.conf
+COPY slurmdbd.conf /etc/slurm/slurmdbd.conf
+RUN set -x \
+    && chown slurm:slurm /etc/slurm/slurmdbd.conf \
+    && chmod 600 /etc/slurm/slurmdbd.conf
+
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-CMD ["slurmdbd"]

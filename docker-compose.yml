@@ -1,4 +1,11 @@
-version: "2.2"
+# format 3.x, validated on W10 - there is no "mode/uid/gid" for docker-compose 1.29/W10
+# you should provide your private/public RSA key in ./ssh dir (named id_rsa.mpi/id_rsa.mpi.pub)
+# docker swarm init, then you have to do // note version_mpinet is the name of the overlay
+# docker network create --driver=overlay --attachable yml_mpinet
+# with xmp and telegraf
+# Jan, 20, 2024 - Jean-Michel Batto
+
+version: "3.9"
 
 services:
   mysql:
@@ -6,12 +13,16 @@ services:
     hostname: mysql
     container_name: mysql
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_DATABASE: slurm_acct_db
-      MYSQL_USER: slurm
-      MYSQL_PASSWORD: password
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: slurm_acct_db
+      MARIADB_USER: slurm
+      MARIADB_PASSWORD: password
     volumes:
       - var_lib_mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - mpinet
 
   slurmdbd:
     image: jmbatto/m2chps-slurm-cluster:latest
@@ -26,6 +37,9 @@ services:
       - "6819"
     depends_on:
       - mysql
+    shm_size: '512m'
+    networks:
+      - mpinet
 
   slurmctld:
     image: jmbatto/m2chps-slurm-cluster:latest
@@ -41,6 +55,9 @@ services:
       - "6817"
     depends_on:
       - "slurmdbd"
+    shm_size: '512m'
+    networks:
+      - mpinet
 
   c1:
     image: jmbatto/m2chps-slurm-cluster:latest
@@ -56,7 +73,9 @@ services:
       - "6818"
     depends_on:
       - "slurmctld"
-
+    shm_size: '512m'
+    networks:
+      - mpinet
   c2:
     image: jmbatto/m2chps-slurm-cluster:latest
     command: ["slurmd"]
@@ -71,7 +90,15 @@ services:
       - "6818"
     depends_on:
       - "slurmctld"
-
+    shm_size: '512m'
+    networks:
+      - mpinet
+      
+networks:
+  mpinet:
+    external: true
+    name : yml_mpinet
+    driver: overlay
 volumes:
   etc_munge:
   etc_slurm:

@@ -194,7 +194,7 @@ RUN set -x \
     && cd bridge \
 	&& export CFLAGS=-I/usr/include/tirpc \
 	&& export LDFLAGS=-ltirpc \
-    && ./configure  --enable-dependency-tracking --enable-debug --prefix=/usr/bin --program-prefix=ccc_ --with-slurm --libdir=/usr/lib64 \
+    && ./configure  --enable-dependency-tracking --enable-debug --prefix=/usr --program-prefix=ccc_ --with-slurm --libdir=/usr/lib64 \
 	&& make \
     && make install
 

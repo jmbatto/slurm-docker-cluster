@@ -22,8 +22,8 @@ RUN apt-get update \
 ENV PREFIX=/usr/local \
 	OPENMPI_VERSION=4.1.6 \
     LD_LIBRARY_PATH=/usr/local/lib \
-    DEBCONF_NOWARNINGS=yes
-	ENV USE_SLURMDBD=true \
+    DEBCONF_NOWARNINGS=yes \
+	USE_SLURMDBD=true \
 	CLUSTER_NAME=linux \
 	CONTROL_MACHINE=slurmctld \
 	SLURMCTLD_PORT=6817 \

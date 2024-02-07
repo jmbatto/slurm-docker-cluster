@@ -2,8 +2,8 @@
 # you should provide your private/public RSA key in ./ssh dir (named id_rsa.mpi/id_rsa.mpi.pub)
 # docker swarm init, then you have to do // note version_mpinet is the name of the overlay
 # docker network create --driver=overlay --attachable yml_mpinet
-# with xmp and telegraf
-# Jan, 20, 2024 - Jean-Michel Batto
+#
+# Feb, 08, 2024 - Jean-Michel Batto
 
 version: "3.9"
 
@@ -31,7 +31,7 @@ services:
     hostname: slurmdbd
     volumes:
       - etc_munge:/etc/munge
-#      - etc_slurm:/etc/slurm
+      - etc_slurm:/etc/slurm
       - var_log_slurm:/var/log/slurm
     expose:
       - "6819"
@@ -48,7 +48,7 @@ services:
     hostname: slurmctld
     volumes:
       - etc_munge:/etc/munge
-#      - etc_slurm:/etc/slurm
+      - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
     expose:
@@ -66,7 +66,7 @@ services:
     container_name: c1
     volumes:
       - etc_munge:/etc/munge
-#      - etc_slurm:/etc/slurm
+      - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
     expose:
@@ -83,7 +83,7 @@ services:
     container_name: c2
     volumes:
       - etc_munge:/etc/munge
-#      - etc_slurm:/etc/slurm
+      - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
     expose:
@@ -101,7 +101,7 @@ networks:
     driver: overlay
 volumes:
   etc_munge:
-#  etc_slurm:
+  etc_slurm:
   slurm_jobdir:
   var_lib_mysql:
   var_log_slurm:

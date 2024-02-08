@@ -3,7 +3,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update \
     && mkdir -p /usr/share/man/man1 \
-    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev libntirpc-dev libpmix-dev libpmix2 libpmi2-0-dev \
+    && apt-get install -y gcc ssh wget vim curl net-tools bison flex autoconf make libtool m4 automake bzip2 libxml2 libxml2-dev gfortran g++ iputils-ping pkg-config colordiff nano git sudo lsof gawk emacs jq neofetch libtdl* astyle cmake gdb strace binutils-dev dnsutils netcat-traditional libgomp1 googletest supervisor munge libmunge2 libmunge-dev mariadb-server libmariadb-dev gnupg psmisc bash-completion libhttp-parser-dev libjson-c-dev libntirpc-dev libpmix-dev libpmix2 libpmi2-0-dev dbus \
     && adduser --uid 1000 --home /home/mpiuser --shell /bin/bash \
        --disabled-password --gecos '' mpiuser \
     && passwd -d mpiuser \
